@@ -73,6 +73,14 @@
       });
       console.log(canton_cases);
 
+      let current_max_cases = 0;
+      for (const [key, value] of Object.entries(canton_cases)) {
+        if (parseInt(value) > current_max_cases) {
+          current_max_cases = parseInt(value);
+        }
+      }
+      console.log(current_max_cases);
+
       svg.append("g")
         .selectAll("path")
         .data(topojson.feature(ch_cantons, ch_cantons.objects.cantons).features)
