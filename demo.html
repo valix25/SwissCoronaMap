@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+    <title> Coronavirus in Switzerland </title>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://d3js.org/topojson.v1.min.js"></script>
+    <script src="https://d3js.org/d3-queue.v2.min.js"></script>
+    <style>
+      body {
+        font-family: "Proxima Nova", "Montserrat", sans-serif;
+      }
+      h1, h2 {
+        position: absolute;
+        left: 10px;
+        font-size: 1.3em;
+        font-weight: 100;
+      }
+      h2 {
+        top: 30px;
+        font-size: 1em;
+      }
+      .country {
+        fill: #222;
+      }
+      .canton-boundaries {
+        fill: none;
+        stroke: #fff;
+        stroke-width: 1;
+      }
+      .municipality-boundaries {
+        fill: none;
+        stroke: #fff;
+        stroke-width: .3;
+      }
+      .hover {
+        fill: yellow;   
+      }
+    </style>
+</head>
+
+<body>
+  <!-- Page elements and content go here. -->
+  <h1>Switzerland current status</h1>
+  <h2></h2>
+
+  <script>
+    // Width and Height of the whole visualization
+    var width = 960;
+    var height = 500;
+     
+    // According to github which generated the topo maps the projection is set to null
+    var path = d3.geoPath().projection(null);
+     
+    // Create the svg where we will draw things
+    var svg = d3.select("body").append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    // Queue up datasets using d3 Queue
+    d3.queue()
+        .defer(d3.json, "data/ch-cantons.json") // Load CH cantons
+        .await(processData)
+
+    // Runs when data is loaded
+    function processData(error, ch_cantons) {
+      if (error) throw error;
+
+      svg.append("g")
+        .selectAll("path")
+        .data(topojson.feature(ch_cantons, ch_cantons.objects.cantons).features)
+        .enter().append("path")
+        .attr("class", "country")
+        .attr("d", path)
+        .on("mouseover", function(d) {
+          d3.select("h2").text(d.properties.name);
+          d3.select(this).attr("class", "country hover");
+        })
+        .on("mouseout", function(d){
+            d3.select("h2").text("");
+            d3.select(this).attr("class", "country");
+        });
+
+      // Adds outline contour around each canton according to the css in canton-boundaries
+      svg.append("path")
+        .datum(topojson.mesh(ch_cantons, ch_cantons.objects.cantons, function(a, b) { return a.id !== b.id; }))
+        .attr("class", "canton-boundaries")
+        .attr("d", path);
+    }
+  </script>
+
+</body>
+</html>
