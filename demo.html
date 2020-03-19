@@ -60,11 +60,18 @@
     // Queue up datasets using d3 Queue
     d3.queue()
         .defer(d3.json, "data/ch-cantons.json") // Load CH cantons
+        .defer(d3.csv, "data/ch-canton-cases-17-03.csv")
         .await(processData)
 
     // Runs when data is loaded
-    function processData(error, ch_cantons) {
+    function processData(error, ch_cantons, ch_cantons_17_03) {
       if (error) throw error;
+
+      var canton_cases = {}; // Create empty object for holding dataset
+      ch_cantons_17_03.forEach(function(d) {
+          canton_cases[d.Canton] = d.Cases;
+      });
+      console.log(canton_cases);
 
       svg.append("g")
         .selectAll("path")
@@ -73,7 +80,7 @@
         .attr("class", "country")
         .attr("d", path)
         .on("mouseover", function(d) {
-          d3.select("h2").text(d.properties.name);
+          d3.select("h2").text(d.properties.name + ": " + canton_cases[d.properties.abbr]);
           d3.select(this).attr("class", "country hover");
         })
         .on("mouseout", function(d){
