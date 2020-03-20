@@ -16,3 +16,10 @@ $ cd /path/to/SwissCoronaMap
 $ python -m SimpleHTTPServer
 ```
 ### Step 3: Go to your http://localhost:8000/ and pick one of the html files to load the respective visualization
+
+
+## Screenshots
+
+![](screenshots/demo-17-03-2020.png)
+
+![](screenshots/demo-17-03-2020_2.png)
