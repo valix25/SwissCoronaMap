@@ -6,6 +6,7 @@
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="https://d3js.org/topojson.v1.min.js"></script>
     <script src="https://d3js.org/d3-queue.v2.min.js"></script>
+    <script src="scripts/d3-legend.min.js"></script>
     <style>
       body {
         font-family: "Proxima Nova", "Montserrat", sans-serif;
@@ -16,8 +17,10 @@
         font-size: 1.3em;
         font-weight: 100;
       }
+      h1 {
+        text-align: center;
+      }
       h2 {
-        top: 30px;
         font-size: 1em;
       }
       .country {
@@ -51,14 +54,33 @@
      
     // Create the svg where we will draw things
     var svg = d3.select("body").append("svg")
-        .attr("width", width)
-        .attr("height", height);
+      .attr("width", width)
+      .attr("height", height);
+
+    d3.select("body").select("h1")
+      .style("top", (height+50).toString() + "px");
+    d3.select("body").select("h2")
+      .style("top", (height+80).toString() + "px");
 
     // Queue up datasets using d3 Queue
     d3.queue()
-        .defer(d3.json, "data/ch-cantons.json") // Load CH cantons
-        .defer(d3.csv, "data/ch-canton-cases-17-03.csv")
-        .await(processData)
+      .defer(d3.json, "data/ch-cantons.json") // Load CH cantons
+      .defer(d3.csv, "data/ch-canton-cases-17-03.csv")
+      .await(processData)
+
+    function addLegend(color_scale) {
+      svg.append("g")
+        .attr("class", "legendLinear")
+        .attr("transform", "translate(20,20)");
+
+      var legendLinear = d3.legendColor()
+        .shapeWidth(50)
+        .orient('horizontal')
+        .scale(color_scale);
+
+      svg.select(".legendLinear")
+        .call(legendLinear);
+    }
 
     // Runs when data is loaded
     function processData(error, ch_cantons, ch_cantons_17_03) {
@@ -71,6 +93,7 @@
 
       var current_max_cases = d3.max( ch_cantons_17_03, function(d) { return parseInt(d.Cases) });
       var color_scale = d3.scaleLinear().domain([0, current_max_cases]).range(['#ece7f2', '#2b8cbe']);
+      console.log(current_max_cases)
 
       svg.append("g")
         .selectAll("path")
@@ -99,6 +122,9 @@
         .datum(topojson.mesh(ch_cantons, ch_cantons.objects.cantons, function(a, b) { return a.id !== b.id; }))
         .attr("class", "canton-boundaries")
         .attr("d", path);
+
+      // Add legend
+      addLegend(color_scale);
     }
   </script>
 
