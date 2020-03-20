@@ -23,3 +23,19 @@ $ python -m SimpleHTTPServer
 ![](screenshots/demo-17-03-2020.png)
 
 ![](screenshots/demo-17-03-2020_2.png)
+
+## Data Sources
+
+https://www.swissinfo.ch/eng/covid-19_switzerland-confirms-second-coronavirus-case/45582788
+
+https://www.swissinfo.ch/eng/covid-19_coronavirus--the-situation-in-switzerland/45592192
+
+https://en.wikipedia.org/wiki/2020_coronavirus_pandemic_in_Switzerland#cite_note-113
+
+https://web.archive.org/web/20200316120424/https://www.bag.admin.ch/bag/en/home/krankheiten/ausbrueche-epidemien-pandemien/aktuelle-ausbrueche-epidemien/novel-cov/situation-schweiz-und-international.html
+
+https://www.bag.admin.ch/bag/en/home/krankheiten/ausbrueche-epidemien-pandemien/aktuelle-ausbrueche-epidemien/novel-cov/situation-schweiz-und-international.html
+
+https://github.com/interactivethings/swiss-maps (Used to obtain and draw the swiss topological map and its cantons)
+
+http://duspviz.mit.edu/d3-workshop/mapping-data-with-d3/ (Source for the contents of the useful folder)
