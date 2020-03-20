@@ -66,7 +66,7 @@
 
       var canton_cases = {}; // Create empty object for holding dataset
       ch_cantons_17_03.forEach(function(d) {
-          canton_cases[d.Canton] = d.Cases;
+        canton_cases[d.Canton] = d.Cases;
       });
 
       var current_max_cases = d3.max( ch_cantons_17_03, function(d) { return parseInt(d.Cases) });
@@ -88,10 +88,10 @@
           d3.select(this).style('fill', 'yellow');
         })
         .on("mouseout", function(d){
-            d3.select("h2").text("");
-            d3.select(this).style('fill', function(d) {
-              return color_scale(canton_cases[d.properties.abbr]);
-            });
+          d3.select("h2").text("");
+          d3.select(this).style('fill', function(d) {
+            return color_scale(canton_cases[d.properties.abbr]);
+          });
         });
 
       // Adds outline contour around each canton according to the css in canton-boundaries
