@@ -20,9 +20,17 @@ $ python -m SimpleHTTPServer
 
 ## Screenshots
 
-![](screenshots/demo-17-03-2020.png)
+Version 0.0.1
 
-![](screenshots/demo-17-03-2020_2.png)
+![](screenshots/update-0.0.1.png)
+
+![](screenshots/update-0.0.1_p2.png)
+
+Version 0.1.0
+
+![](screenshots/update-0.1.0.png)
+
+![](screenshots/update-0.1.0_p2.png)
 
 ## Data Sources
 
