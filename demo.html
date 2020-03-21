@@ -7,6 +7,7 @@
     <script src="https://d3js.org/topojson.v1.min.js"></script>
     <script src="https://d3js.org/d3-queue.v2.min.js"></script>
     <script src="scripts/d3-legend.min.js"></script>
+    <script src="scripts/d3-tip.js"></script>
     <style>
       body {
         font-family: "Proxima Nova", "Montserrat", sans-serif;
@@ -36,6 +37,13 @@
         stroke: #fff;
         stroke-width: .3;
       }
+      .d3-tip {
+        line-height: 1;
+        padding: 12px;
+        background: rgba(43,43,43, 0.8);
+        color: #fff;
+        border-radius: 2px;
+      }
     </style>
 </head>
 
@@ -48,7 +56,7 @@
     // Width and Height of the whole visualization
     var width = 960;
     var height = 500;
-     
+
     // According to github which generated the topo maps the projection is set to null
     var path = d3.geoPath().projection(null);
      
@@ -56,6 +64,12 @@
     var svg = d3.select("body").append("svg")
       .attr("width", width)
       .attr("height", height);
+
+    var tool_tip = d3.tip()
+      .attr("class", "d3-tip")
+      .offset([-8, 0])
+      .html(function(d) { return "Blabla: "; });
+    svg.call(tool_tip);
 
     d3.select("body").select("h1")
       .style("top", (height+50).toString() + "px");
@@ -100,17 +114,21 @@
         .data(topojson.feature(ch_cantons, ch_cantons.objects.cantons).features)
         .enter().append("path")
         .attr("class", "country")
-        .attr("d", path);
+        .attr("d", path)
+        .on("mouseover", tool_tip.show)
+        .on("mouseout", tool_tip.hide);
 
       svg.selectAll("path")
         .style('fill', function(d) {
           return color_scale(canton_cases[d.properties.abbr]);
         })
         .on("mouseover", function(d) {
+          tool_tip.show;
           d3.select("h2").text(d.properties.name + ": " + canton_cases[d.properties.abbr]);
           d3.select(this).style('fill', 'yellow');
         })
         .on("mouseout", function(d){
+          tool_tip.hide;
           d3.select("h2").text("");
           d3.select(this).style('fill', function(d) {
             return color_scale(canton_cases[d.properties.abbr]);
