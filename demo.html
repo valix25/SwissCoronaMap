@@ -65,16 +65,16 @@
       .attr("width", width)
       .attr("height", height);
 
-    var tool_tip = d3.tip()
-      .attr("class", "d3-tip")
-      .offset([-8, 0])
-      .html(function(d) { return "Blabla: "; });
-    svg.call(tool_tip);
-
     d3.select("body").select("h1")
       .style("top", (height+50).toString() + "px");
     d3.select("body").select("h2")
       .style("top", (height+80).toString() + "px");
+
+    var tooltip = d3.select("body")
+      .append("div")
+        .style("position", "absolute")
+        .style("visibility", "hidden")
+        .text("I'm a circle!");
 
     // Queue up datasets using d3 Queue
     d3.queue()
@@ -114,25 +114,26 @@
         .data(topojson.feature(ch_cantons, ch_cantons.objects.cantons).features)
         .enter().append("path")
         .attr("class", "country")
-        .attr("d", path)
-        .on("mouseover", tool_tip.show)
-        .on("mouseout", tool_tip.hide);
+        .attr("d", path);
 
       svg.selectAll("path")
         .style('fill', function(d) {
           return color_scale(canton_cases[d.properties.abbr]);
         })
         .on("mouseover", function(d) {
-          tool_tip.show;
           d3.select("h2").text(d.properties.name + ": " + canton_cases[d.properties.abbr]);
-          d3.select(this).style('fill', 'yellow');
+          // d3.select(this).style('fill', 'yellow');
+          tooltip.style("visibility", "visible");
+        })
+        .on("mousemove", function() {
+          tooltip.style("top", (event.pageY-25)+"px").style("left",(event.pageX-25)+"px");
         })
         .on("mouseout", function(d){
-          tool_tip.hide;
           d3.select("h2").text("");
           d3.select(this).style('fill', function(d) {
             return color_scale(canton_cases[d.properties.abbr]);
           });
+          tooltip.style("visibility", "hidden");
         });
 
       // Adds outline contour around each canton according to the css in canton-boundaries
