@@ -70,7 +70,8 @@
         .style("border", "solid")
         .style("border-width", "1px")
         .style("border-radius", "5px")
-        .style("padding", "10px");
+        .style("padding", "10px")
+        .attr("class", "tooltip");
 
     // Queue up datasets using d3 Queue
     d3.queue()
@@ -129,18 +130,16 @@
           return color_scale(canton_cases[d.properties.abbr][index_date]);
         })
         .on("mouseover", function(d) {
-          tooltip.style("visibility", "visible");
-          tooltip.text(d.properties.name + ": " + canton_cases[d.properties.abbr][index_date])
+          // tooltip.style("visibility", "visible");
+          // tooltip.text(d.properties.name + ": " + canton_cases[d.properties.abbr][index_date]);
         })
         .on("mousemove", function() {
-          tooltip.style("top", (event.pageY + 25) + "px").style("left", (event.pageX + 25) + "px");
+          // tooltip.style("top", (event.pageY + 25) + "px").style("left", (event.pageX + 25) + "px");
         })
         .on("mouseout", function(d){
-          d3.select("h2").text("");
           d3.select(this).style('fill', function(d) {
             return color_scale(canton_cases[d.properties.abbr][index_date]);
           });
-          tooltip.style("visibility", "hidden");
         });
 
       // Adds outline contour around each canton according to the css in canton-boundaries
@@ -148,6 +147,23 @@
         .datum(topojson.mesh(ch_cantons, ch_cantons.objects.cantons, function(a, b) { return a.id !== b.id; }))
         .attr("class", "canton-boundaries")
         .attr("d", path);
+
+      svg.append("g")
+        .selectAll("labels")
+        .data(topojson.feature(ch_cantons, ch_cantons.objects.cantons).features)
+        .enter().append("text")
+        .attr("x", function(d) {
+            return path.centroid(d)[0];
+        })
+        .attr("y", function(d) {
+            return path.centroid(d)[1];
+        })
+        .attr("text-anchor", "middle")
+        .attr("alignment-baseline", "central")
+        .text(function(d) {
+          return canton_cases[d.properties.abbr][index_date];
+        })
+        .attr("class", "labels");
 
       // Add legend
       addLegend(color_scale);
@@ -161,6 +177,10 @@
       svg.selectAll(".country")
         .style('fill', function(d) {
           return color_scale(canton_cases[d.properties.abbr][index_date]);
+        });
+      svg.selectAll(".labels")
+        .text(function(d) {
+          return canton_cases[d.properties.abbr][index_date];
         });
     });
 
