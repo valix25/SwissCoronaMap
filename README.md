@@ -32,6 +32,10 @@ $ python -m SimpleHTTPServer
 
 ![](screenshots/update-0.1.0_p2.png)
 
+> demo-v2.html version 0.0.1
+
+![](screenshots/update-v2-0.0.1.png)
+
 ## Data Sources
 
 https://www.swissinfo.ch/eng/covid-19_switzerland-confirms-second-coronavirus-case/45582788
