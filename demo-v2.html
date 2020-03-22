@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+    <title> Coronavirus in Switzerland </title>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://d3js.org/topojson.v1.min.js"></script>
+    <script src="https://d3js.org/d3-queue.v2.min.js"></script>
+    <script src="scripts/d3-legend.min.js"></script>
+    <style>
+      body {
+        font-family: "Proxima Nova", "Montserrat", sans-serif;
+      }
+      .country {
+        fill: #222;
+      }
+      .canton-boundaries {
+        fill: none;
+        stroke: #fff;
+        stroke-width: 1;
+      }
+      .municipality-boundaries {
+        fill: none;
+        stroke: #fff;
+        stroke-width: .3;
+      }
+      #sliderContainer {
+        text-align: center;
+        position: relative;
+      }
+    </style>
+</head>
+
+<body>
+  <!-- Page elements and content go here. -->
+  <!-- Slider for the progession of the coronavirus -->
+  <div id="sliderContainer">
+    <!-- The max value will be updated later once the data is read -->
+    <input id="timeslide" type="range" min="0" max="10" value="0" step="1"/><br>
+    <span id="range"></span>
+  </div>
+
+  <script>
+    // Width and Height of the whole visualization
+    var width = 960;
+    var height = 500;
+
+    // Keeps track of date index we are currently at
+    var index_date = 0;
+
+    // According to github which generated the topo maps the projection is set to null
+    var path = d3.geoPath().projection(null);
+     
+    // Create the svg where we will draw things
+    var svg = d3.select("body").append("svg")
+      .attr("width", width)
+      .attr("height", height);
+
+    // Adjust slider position
+    d3.select("body").select("#sliderContainer")
+      .style("top", (height + 65).toString() + "px")
+      .style("left", "-100px");
+
+    // Tooltip to appear when hovering on a canton
+    var tooltip = d3.select("body")
+      .append("div")
+        .style("position", "absolute")
+        .style("visibility", "hidden")
+        .style("background-color", "white")
+        .style("border", "solid")
+        .style("border-width", "1px")
+        .style("border-radius", "5px")
+        .style("padding", "10px");
+
+    // Queue up datasets using d3 Queue
+    d3.queue()
+      .defer(d3.json, "data/ch-cantons.json") // Load CH cantons
+      .defer(d3.csv, "data/wikipedia_coronavirus_switzerland.csv")
+      .await(processData)
+
+    var dates = [];
+    var cantons = [];
+    var canton_cases = {};
+    var current_max_cases = 0;
+    var color_scale = d3.scaleLinear().domain([0, 1]).range(['#ece7f2', '#2b8cbe']);
+
+    // Runs when data is loaded
+    function processData(error, ch_cantons, ch_wiki_covid) {
+      if (error) throw error;
+
+      // Create data containers from ch_wiki_covid
+      ch_wiki_covid.forEach(function(d) {
+        dates.push(d.Date);
+      });
+
+      d3.select("#timeslide")
+        .attr("max", dates.length - 1);
+      d3.select("#range")
+        .html(formatString(dates[index_date]));
+
+      cantons = ch_wiki_covid.columns.slice(1);
+
+      cantons.forEach(function(d) {
+        canton_cases[d] = [];
+      });
+      ch_wiki_covid.forEach(function(d) {
+        cantons.forEach(function(c) {
+          canton_cases[c].push(parseInt(d[c]));
+        })
+      });
+
+      // Set up folor scale from 0 to the highest number of cases in a canton so far
+      cantons.forEach(function(c) {
+        canton_cases[c].forEach(function(d) {
+          if (d > current_max_cases) current_max_cases = d;
+        })
+      });
+      color_scale = d3.scaleLinear().domain([0, current_max_cases]).range(['#ece7f2', '#2b8cbe']);
+
+      svg.append("g")
+        .selectAll("path")
+        .data(topojson.feature(ch_cantons, ch_cantons.objects.cantons).features)
+        .enter().append("path")
+        .attr("class", "country")
+        .attr("d", path);
+
+      svg.selectAll("path")
+        .style('fill', function(d) {
+          return color_scale(canton_cases[d.properties.abbr][index_date]);
+        })
+        .on("mouseover", function(d) {
+          tooltip.style("visibility", "visible");
+          tooltip.text(d.properties.name + ": " + canton_cases[d.properties.abbr][index_date])
+        })
+        .on("mousemove", function() {
+          tooltip.style("top", (event.pageY + 25) + "px").style("left", (event.pageX + 25) + "px");
+        })
+        .on("mouseout", function(d){
+          d3.select("h2").text("");
+          d3.select(this).style('fill', function(d) {
+            return color_scale(canton_cases[d.properties.abbr][index_date]);
+          });
+          tooltip.style("visibility", "hidden");
+        });
+
+      // Adds outline contour around each canton according to the css in canton-boundaries
+      svg.append("path")
+        .datum(topojson.mesh(ch_cantons, ch_cantons.objects.cantons, function(a, b) { return a.id !== b.id; }))
+        .attr("class", "canton-boundaries")
+        .attr("d", path);
+
+      // Add legend
+      addLegend(color_scale);
+    }
+
+    // When the input range changes update the values
+    d3.select("#timeslide").on("input", function() {
+      index_date = this.value;
+      d3.select("#range")
+        .html(formatString(dates[index_date]));
+      svg.selectAll(".country")
+        .style('fill', function(d) {
+          return color_scale(canton_cases[d.properties.abbr][index_date]);
+        });
+    });
+
+    function addLegend(color_scale) {
+      svg.append("g")
+        .attr("class", "legendLinear")
+        .attr("transform", "translate(20,20)");
+
+      var legendLinear = d3.legendColor()
+        .shapeWidth(50)
+        .orient('horizontal')
+        .scale(color_scale);
+
+      svg.select(".legendLinear")
+        .call(legendLinear);
+    }
+
+    function formatString(str) {
+      var month = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+      var parts = str.split('.');
+      var date = new Date(parts[2]+"20", parts[1], parts[0]);
+      return date.getDate() + " " + month[date.getMonth() - 1];
+    }
+  </script>
+
+</body>
+</html>
