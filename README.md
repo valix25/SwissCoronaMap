@@ -49,6 +49,8 @@ April 2nd 2020
 
 ## Data Sources
 
+https://github.com/daenuprobst/covid19-cases-switzerland (currently [April 2nd 2020] used to get the data)
+
 https://www.swissinfo.ch/eng/covid-19_switzerland-confirms-second-coronavirus-case/45582788
 
 https://www.swissinfo.ch/eng/covid-19_coronavirus--the-situation-in-switzerland/45592192
